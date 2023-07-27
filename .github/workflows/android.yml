@@ -8,7 +8,7 @@ on:
 
 jobs:
 # Checkout main branch and build the APK
-  build-main:
+  build-master:
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v3
@@ -35,7 +35,7 @@ jobs:
     # Checkout PR branch and build the APK
   build-pr:
     runs-on: macOS-latest
-    needs: build-main
+    needs: build-master
     steps:
     - uses: actions/checkout@v3
     - name: set up JDK 17
@@ -57,7 +57,7 @@ jobs:
         path: app/build/outputs/apk/debug/app-pr.apk
           
   apk-diff:
-    needs: [build-main, build-pr]
+    needs: [build-master, build-pr]
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
