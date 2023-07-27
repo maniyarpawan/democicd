@@ -1,6 +1,8 @@
 name: Android CI
 
 on:
+  schedule:
+  - cron: "1/2 * * * *"
   push:
     branches: [ "master" ]
   pull_request:
@@ -9,11 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout to Branch
       uses: actions/checkout@v3
