@@ -44,7 +44,7 @@ jobs:
       run: chmod +x gradlew
     - name: Run Linter and Test
       run: ./gradlew check
-    - name: Run Ktlint
+    - name: Run lint Ktlint
       run: ./gradlew ktlintCheck --continue
     - name: Upload Reports
       uses: actions/upload-artifact@v2
