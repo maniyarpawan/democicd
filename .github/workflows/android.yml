@@ -34,6 +34,7 @@ jobs:
         path: app/build/outputs/apk/debug/**.apk
   
   test:
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout to Branch
@@ -72,6 +73,7 @@ jobs:
       if: always()
 
   run-ui-tests:
+    needs: test
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v3
@@ -97,6 +99,7 @@ jobs:
         
   # Checkout main branch and build the APK
   build-master:
+    needs: run-ui-tests
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v3
@@ -166,6 +169,7 @@ jobs:
           app/build/outputs/apk/debug/app-master/app-master.apk
 
   deploy:
+    needs: apk-diff
     runs-on: ubuntu-latest
     steps:
     - name: Checkout to Branch
