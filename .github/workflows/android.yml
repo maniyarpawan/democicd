@@ -15,14 +15,12 @@ jobs:
       uses: actions/checkout@v3
     - name: Echo build job
       run: echo "Build job done"
-      
     - name: set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
@@ -95,6 +93,93 @@ jobs:
       with:
         name: UI-Test-Reports
         path: app/build/reports
+        
+        
+  # Checkout main branch and build the APK
+  build-master:
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: master
+    - name: set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build Master APK
+      run: ./gradlew assembleDebug && mv
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/debug/app-master.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v1
+      with:
+        name: apk_master
+        path: app/build/outputs/apk/debug/app-master.apk
+
+  # Checkout PR branch and build the APK
+  build-pr:
+    runs-on: macOS-latest
+    needs: build-master
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build PR APK
+      run: ./gradlew assembleDebug && mv
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/debug/app-pr.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v1
+      with:
+        name: apk_pr
+        path: app/build/outputs/apk/debug/app-pr.apk
+          
+  apk-diff:
+    needs: [build-master, build-pr]
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install diffuse
+      run: brew install JakeWharton/repo/diffuse
+    - name: download artifact
+      uses: actions/download-artifact@v2.1.1
+      with:
+        name: apk_master
+        path: app/build/outputs/apk/debug/app-master
+    - name: download artifact
+      uses: actions/download-artifact@v2.1.1
+      with:
+        name: apk_pr
+        path: app/build/outputs/apk/debug/app-pr
+    - name: run differ
+      run: diffuse diff
+          app/build/outputs/apk/debug/app-master/app-master.apk
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout to Branch
+      uses: actions/checkout@v3
+    - name: Docker Build & Push Action
+      uses: mr-smithers-excellent/docker-build-push@v6.2
+      with:
+        image: maniyarpawan/my-demo-cicd-app-image
+        tags: cicd-docker-image-tag
+        registry: docker.io
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+
 
 #   build:
 
