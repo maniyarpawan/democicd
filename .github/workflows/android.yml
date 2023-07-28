@@ -165,7 +165,9 @@ jobs:
         name: apk_pr
         path: app/build/outputs/apk/debug/app-pr
     - name: run differ
-      run: diffuse diff app/build/outputs/apk/debug/app-master/app-master.apk
+      run: diffuse diff 
+          app/build/outputs/apk/debug/app-master/app-master.apk
+          pp/build/outputs/apk/debug/app-pr/app-pr.apk
 
   deploy:
     needs: apk-diff
